@@ -1,4 +1,6 @@
 from time import time
+import json
+import hashlib
 
 
 class easychain:
@@ -31,3 +33,28 @@ class easychain:
             'amount': amount
         })
         return self.last_block['index'] + 1
+
+    @property
+    def last_block(self):
+        return self.chain[-1]
+
+    @staticmethod
+    def hash(block):
+        block_data = json.dumps(block, sort_Keys=True)
+        print(block_data)
+        encrypted_block_data = hashlib.sha256(block_data.encode()).hexdigest()
+        return encrypted_block_data
+
+    @staticmethod
+    def valid_proof(last_proof, proof):
+        guess = f'{last_proof}{proof}'.encode()
+        guess_hash = hashlib.sha256(guess).hexdigest()
+        return guess_hash[:4] == "0000"
+
+    def proof_of_work(self, last_proof):
+        proof = 0
+
+        while self.valid_proof(last_proof, proof) is False:
+            proof += 1
+
+        return proof
